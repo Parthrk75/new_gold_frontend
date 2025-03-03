@@ -1,5 +1,4 @@
 import { HeroSection } from "@/components/hero-section";
-// import { MarketStats } from "@/components/market-stats";
 import { NewsSection } from "@/components/news-section";
 import { PriceCard } from "@/components/price-card";
 import { PriceChart } from "@/components/price-chart";
@@ -15,8 +14,6 @@ export default function Home() {
       <HeroSection />
       
       <div className="container py-12">
-        {/* <h2 className="text-3xl font-bold mb-8">Gold Market Overview</h2>
-        <MarketStats /> */}
         
         <div className="mt-12">
           <h2 className="text-2xl font-bold mb-6">Gold Prices by Karat</h2>

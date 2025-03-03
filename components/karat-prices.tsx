@@ -12,35 +12,49 @@ interface KaratPrice {
 }
 
 export function KaratPrices() {
-  const [prices, setPrices] = useState<KaratPrice[]>([
-    { karat: "24K", price: 2345.67, change: 12.45, changePercent: 0.53 },
-    { karat: "22K", price: 2150.32, change: 11.42, changePercent: 0.53 },
-    { karat: "18K", price: 1759.25, change: 9.34, changePercent: 0.53 },
-    { karat: "14K", price: 1370.54, change: 7.28, changePercent: 0.53 }
-  ]);
-  
+  const [prices, setPrices] = useState<KaratPrice[]>([]);
+  const [lastPrices, setLastPrices] = useState<KaratPrice[]>([]);
+
   useEffect(() => {
-    // Simulate price updates every 8 seconds
-    const interval = setInterval(() => {
-      setPrices(prevPrices => 
-        prevPrices.map(price => {
-          const randomChange = (Math.random() * 10 - 5);
-          const newPrice = price.price + randomChange;
-          const changePercent = (randomChange / price.price) * 100;
-          
-          return {
-            ...price,
-            price: newPrice,
-            change: randomChange,
-            changePercent: changePercent
-          };
-        })
-      );
-    }, 8000);
-    
+    async function fetchPrices() {
+      try {
+        const response = await fetch("/api/gold-price");
+        if (!response.ok) throw new Error("Failed to fetch gold prices");
+        
+        const result = await response.json();
+        if (!result || !result.goldPrice) throw new Error("Invalid API response");
+
+        const gold24k = parseFloat(result.goldPrice);
+        const gold22k = gold24k * 0.9167;
+        const gold18k = gold24k * 0.75;
+        const gold14k = gold24k * 0.5833;
+
+        const newPrices = [
+          { karat: "24K", price: gold24k, change: 0, changePercent: 0 },
+          { karat: "22K", price: gold22k, change: 0, changePercent: 0 },
+          { karat: "18K", price: gold18k, change: 0, changePercent: 0 },
+          { karat: "14K", price: gold14k, change: 0, changePercent: 0 }
+        ];
+
+        setPrices(prevPrices => {
+          if (prevPrices.length === 0) return newPrices;
+          return newPrices.map((price, index) => {
+            const lastPrice = prevPrices[index].price;
+            const change = price.price - lastPrice;
+            const changePercent = (change / lastPrice) * 100;
+            return { ...price, change, changePercent };
+          });
+        });
+      } catch (error) {
+        console.error("Error fetching live prices:", error);
+      }
+    }
+
+    fetchPrices();
+    const interval = setInterval(fetchPrices, 120000);
     return () => clearInterval(interval);
   }, []);
-  
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
       {prices.map((price) => (
