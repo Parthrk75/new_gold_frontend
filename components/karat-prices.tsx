@@ -2,7 +2,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowDown, ArrowUp } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 
 interface KaratPrice {
   karat: string;
@@ -13,51 +13,62 @@ interface KaratPrice {
 
 export function KaratPrices() {
   const [prices, setPrices] = useState<KaratPrice[]>([]);
-  const [lastPrices, setLastPrices] = useState<KaratPrice[]>([]);
+  const [displayPrices, setDisplayPrices] = useState<KaratPrice[]>([]);
+  const [lastUpdated, setLastUpdated] = useState<string>("");
+  const lastPricesRef = useRef<KaratPrice[]>([]); // ✅ Store last prices persistently
 
   useEffect(() => {
     async function fetchPrices() {
       try {
-        const response = await fetch("/api/gold-price");
-        if (!response.ok) throw new Error("Failed to fetch gold prices");
-        
+        console.log("Fetching live gold price...");
+        const response = await fetch("https://api.gold-api.com/price/XAU");
+        if (!response.ok) throw new Error("Failed to fetch live gold prices");
+
         const result = await response.json();
-        if (!result || !result.goldPrice) throw new Error("Invalid API response");
+        if (!result || !result.price) throw new Error("Invalid API response");
 
-        const gold24k = parseFloat(result.goldPrice);
-        const gold22k = gold24k * 0.9167;
-        const gold18k = gold24k * 0.75;
-        const gold14k = gold24k * 0.5833;
+        const gold24k = parseFloat(result.price);
+        if (isNaN(gold24k)) throw new Error("Invalid gold price data");
 
-        const newPrices = [
+        // ✅ Convert to different karats
+        const newPrices: KaratPrice[] = [
           { karat: "24K", price: gold24k, change: 0, changePercent: 0 },
-          { karat: "22K", price: gold22k, change: 0, changePercent: 0 },
-          { karat: "18K", price: gold18k, change: 0, changePercent: 0 },
-          { karat: "14K", price: gold14k, change: 0, changePercent: 0 }
+          { karat: "22K", price: gold24k * 0.9167, change: 0, changePercent: 0 },
+          { karat: "18K", price: gold24k * 0.75, change: 0, changePercent: 0 },
+          { karat: "14K", price: gold24k * 0.5833, change: 0, changePercent: 0 }
         ];
 
-        setPrices(prevPrices => {
-          if (prevPrices.length === 0) return newPrices;
-          return newPrices.map((price, index) => {
-            const lastPrice = prevPrices[index].price;
-            const change = price.price - lastPrice;
-            const changePercent = (change / lastPrice) * 100;
-            return { ...price, change, changePercent };
-          });
+        // ✅ Compute price change (keep previous values for 2 minutes)
+        const updatedPrices = newPrices.map((price, index) => {
+          const lastPrice = lastPricesRef.current[index]?.price || price.price;
+          const change = price.price - lastPrice;
+          const changePercent = lastPrice !== 0 ? (change / lastPrice) * 100 : 0;
+
+          return { ...price, change, changePercent };
         });
+
+        setPrices(updatedPrices); // ✅ Store new prices
+        setLastUpdated(new Date().toLocaleTimeString());
+
+        // ✅ Keep the displayed prices for 2 minutes
+        setDisplayPrices(updatedPrices);
+        setTimeout(() => setDisplayPrices(updatedPrices), 120000); // 2 minutes delay
+
+        // ✅ Update lastPricesRef without triggering a re-render
+        lastPricesRef.current = newPrices;
       } catch (error) {
         console.error("Error fetching live prices:", error);
       }
     }
 
     fetchPrices();
-    const interval = setInterval(fetchPrices, 120000);
+    const interval = setInterval(fetchPrices, 120000); // Fetch every 2 minutes
     return () => clearInterval(interval);
   }, []);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      {prices.map((price) => (
+      {displayPrices.map((price) => (
         <Card key={price.karat} className="overflow-hidden">
           <CardHeader className="pb-2 bg-gradient-to-r from-yellow-100 to-yellow-50 dark:from-yellow-900/30 dark:to-yellow-800/20">
             <CardTitle className="text-lg font-medium">{price.karat} Gold</CardTitle>
@@ -65,19 +76,18 @@ export function KaratPrices() {
           <CardContent className="pt-4">
             <div className="flex items-baseline justify-between">
               <div className="text-2xl font-bold">${price.price.toFixed(2)}</div>
-              <div className={`flex items-center ${price.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-                {price.change >= 0 ? 
-                  <ArrowUp className="h-4 w-4 mr-1" /> : 
+              <div className={`flex items-center ${price.change >= 0 ? "text-green-500" : "text-red-500"}`}>
+                {price.change >= 0 ? (
+                  <ArrowUp className="h-4 w-4 mr-1" />
+                ) : (
                   <ArrowDown className="h-4 w-4 mr-1" />
-                }
+                )}
                 <span className="text-sm font-medium">
                   {Math.abs(price.change).toFixed(2)} ({Math.abs(price.changePercent).toFixed(2)}%)
                 </span>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground mt-2">
-              Per troy ounce • Updated {new Date().toLocaleTimeString()}
-            </p>
+            <p className="text-xs text-muted-foreground mt-2">Per troy ounce • Updated {lastUpdated}</p>
           </CardContent>
         </Card>
       ))}

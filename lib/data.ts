@@ -73,3 +73,9 @@ export const getMarketNews = (): NewsItem[] => {
     }
   ];
 };
+
+
+
+
+
+
