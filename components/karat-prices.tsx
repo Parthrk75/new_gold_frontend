@@ -94,3 +94,5 @@ export function KaratPrices() {
     </div>
   );
 }
+
+
