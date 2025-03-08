@@ -65,7 +65,7 @@ export default function FAQPage() {
                   <AccordionItem value="item-5">
                     <AccordionTrigger>What is the gold-silver ratio?</AccordionTrigger>
                     <AccordionContent>
-                      The gold-silver ratio represents how many ounces of silver it takes to purchase one ounce of gold. It's calculated by dividing the current gold price by the current silver price. Investors use this ratio to determine the relative value of the two metals and potential trading opportunities when the ratio reaches historical extremes.
+                      The gold-silver ratio represents how many ounces of silver it takes to purchase one ounce of gold. Its calculated by dividing the current gold price by the current silver price. Investors use this ratio to determine the relative value of the two metals and potential trading opportunities when the ratio reaches historical extremes.
                     </AccordionContent>
                   </AccordionItem>
                 </Accordion>
@@ -166,7 +166,7 @@ export default function FAQPage() {
             <div className="mt-8 bg-muted rounded-lg p-6">
               <h3 className="font-bold text-xl mb-4">Still Have Questions?</h3>
               <p className="mb-4">
-                If you couldn't find the answer you were looking for, please contact our support team.
+                If you couldnt find the answer you were looking for, please contact our support team.
               </p>
               <p className="text-sm">
                 Email: <a href="mailto:support@goldtrack.example.com" className="text-primary hover:underline">support@goldtrack.example.com</a>

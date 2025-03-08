@@ -175,3 +175,12 @@ export default function HistoricalDataPage() {
     </div>
   );
 }
+
+
+
+
+
+
+
+
+

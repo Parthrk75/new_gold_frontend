@@ -114,7 +114,7 @@ export default function Home() {
         </div>
       </div>
       
-      <NewsSection />
+      {/* <NewsSection /> */}
       <Footer />
     </div>
   );

@@ -34,48 +34,67 @@ export const getHistoricalData = (): HistoricalData[] => {
 };
 
 // Mock news data
-export const getMarketNews = (): NewsItem[] => {
-  return [
-    {
-      id: '1',
-      title: 'Gold Prices Surge Amid Global Economic Uncertainty',
-      summary: 'Gold prices reached a new high today as investors seek safe-haven assets amid growing economic concerns.',
-      source: 'Financial Times',
-      url: '#',
-      publishedAt: '2025-04-15T09:30:00Z',
-      imageUrl: 'https://images.unsplash.com/photo-1610375461369-d613b564c5c3?q=80&w=2070&auto=format&fit=crop'
-    },
-    {
-      id: '2',
-      title: 'Central Banks Increase Gold Reserves',
-      summary: 'Several central banks have reported significant increases in their gold reserves as part of diversification strategies.',
-      source: 'Bloomberg',
-      url: '#',
-      publishedAt: '2025-04-14T14:15:00Z',
-      imageUrl: 'https://images.unsplash.com/photo-1589758438368-0ad531db3366?q=80&w=2070&auto=format&fit=crop'
-    },
-    {
-      id: '3',
-      title: 'Gold Mining Stocks Rally Following Production Reports',
-      summary: 'Major gold mining companies saw their stocks rise after reporting better-than-expected production figures for Q1 2025.',
-      source: 'Reuters',
-      url: '#',
-      publishedAt: '2025-04-13T11:45:00Z',
-      imageUrl: 'https://images.unsplash.com/photo-1624365169198-f1631dbc41ff?q=80&w=1000&auto=format&fit=crop'
-    },
-    {
-      id: '4',
-      title: 'Analysts Predict Gold to Reach $2,500 by Year End',
-      summary: 'Leading market analysts have revised their forecasts, predicting gold prices could reach $2,500 per ounce by the end of 2025.',
-      source: 'Wall Street Journal',
-      url: '#',
-      publishedAt: '2025-04-12T08:20:00Z'
-    }
-  ];
-};
+// export const getMarketNews = (): NewsItem[] => {
+//   return [
+//     {
+//       id: '1',
+//       title: 'Gold Prices Surge Amid Global Economic Uncertainty',
+//       summary: 'Gold prices reached a new high today as investors seek safe-haven assets amid growing economic concerns.',
+//       source: 'Financial Times',
+//       url: '#',
+//       publishedAt: '2025-04-15T09:30:00Z',
+//       imageUrl: 'https://images.unsplash.com/photo-1610375461369-d613b564c5c3?q=80&w=2070&auto=format&fit=crop'
+//     },
+//     {
+//       id: '2',
+//       title: 'Central Banks Increase Gold Reserves',
+//       summary: 'Several central banks have reported significant increases in their gold reserves as part of diversification strategies.',
+//       source: 'Bloomberg',
+//       url: '#',
+//       publishedAt: '2025-04-14T14:15:00Z',
+//       imageUrl: 'https://images.unsplash.com/photo-1589758438368-0ad531db3366?q=80&w=2070&auto=format&fit=crop'
+//     },
+//     {
+//       id: '3',
+//       title: 'Gold Mining Stocks Rally Following Production Reports',
+//       summary: 'Major gold mining companies saw their stocks rise after reporting better-than-expected production figures for Q1 2025.',
+//       source: 'Reuters',
+//       url: '#',
+//       publishedAt: '2025-04-13T11:45:00Z',
+//       imageUrl: 'https://images.unsplash.com/photo-1624365169198-f1631dbc41ff?q=80&w=1000&auto=format&fit=crop'
+//     },
+//     {
+//       id: '4',
+//       title: 'Analysts Predict Gold to Reach $2,500 by Year End',
+//       summary: 'Leading market analysts have revised their forecasts, predicting gold prices could reach $2,500 per ounce by the end of 2025.',
+//       source: 'Wall Street Journal',
+//       url: '#',
+//       publishedAt: '2025-04-12T08:20:00Z'
+//     }
+//   ];
+// };
 
 
 
 
 
 
+export async function getMarketNews(): Promise<NewsItem[]> {
+  try {
+    const res = await fetch("/api/gold-news");
+    if (!res.ok) throw new Error("Failed to fetch news");
+
+    const data = await res.json();
+    return data.articles.map((article: any) => ({
+      title: article.title,
+      url: article.link,
+      publishedAt: article.pubDate,
+      source: article.source,
+      imageUrl: article.imageUrl || "/placeholder.jpg", // Provide default image if none
+      summary: article.summary || "No summary available.",
+    }));
+  } catch (error) {
+    console.error("Error fetching news:", error);
+    return [];
+  }
+}
