@@ -1,159 +1,163 @@
+// "use client";
+
+// import { useEffect, useState } from "react";
+
+// interface ETF {
+//   symbol: string;
+//   name: string;
+//   price: number;
+//   change: number;
+//   volume: number;
+// }
+
+// export function GoldETFs() {
+//   const [etfs, setETFs] = useState<ETF[]>([]);
+//   const [loading, setLoading] = useState(true);
+
+//   useEffect(() => {
+//     async function fetchETFs() {
+//       try {
+//         const response = await fetch("/api/gold-etfs");
+//         const data = await response.json();
+//         setETFs(data);
+//       } catch (error) {
+//         console.error("Error fetching ETF data:", error);
+//       } finally {
+//         setLoading(false);
+//       }
+//     }
+//     fetchETFs();
+//   }, []);
+
+//   if (loading) return <p>Loading Gold ETFs...</p>;
+
+//   return (
+//     <div>
+//       <h2 className="text-2xl font-bold mb-4">Gold ETFs</h2>
+//       <table className="min-w-full table-auto border-collapse border border-gray-200">
+//         <thead>
+//           <tr>
+//             <th className="border-b px-4 py-2 text-left">Symbol</th>
+//             <th className="border-b px-4 py-2 text-left">Company</th>
+//             <th className="border-b px-4 py-2 text-left">Price</th>
+//             <th className="border-b px-4 py-2 text-left">Change</th>
+//             <th className="border-b px-4 py-2 text-left">Volume</th>
+//           </tr>
+//         </thead>
+//         <tbody>
+//           {etfs.map((etf) => (
+//             <tr key={etf.symbol}>
+//               <td className="border-b px-4 py-2">{etf.symbol}</td>
+//               <td className="border-b px-4 py-2">{etf.name}</td>
+//               <td className="border-b px-4 py-2">${etf.price.toFixed(2)}</td>
+//               <td className={`border-b px-4 py-2 ${etf.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+//                 {etf.change >= 0 ? "+" : ""}
+//                 {etf.change.toFixed(2)}
+//               </td>
+//               <td className="border-b px-4 py-2">{etf.volume.toLocaleString()}</td>
+//             </tr>
+//           ))}
+//         </tbody>
+//       </table>
+//     </div>
+//   );
+// }
+
+
+
+
+
+
 "use client";
 
+import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { 
-  Area, 
-  AreaChart, 
-  CartesianGrid, 
-  ResponsiveContainer, 
-  Tooltip, 
-  XAxis, 
-  YAxis 
-} from "recharts";
+import { ArrowDown, ArrowUp } from "lucide-react";
 
-interface GoldETF {
-  id: string;
-  name: string;
+interface ETF {
   symbol: string;
+  name: string;
   price: number;
   change: number;
   changePercent: number;
-  aum: string;
-  expense: string;
-  chartData: { date: string; price: number }[];
+  volume: string;
 }
 
 export function GoldETFs() {
-  const etfs: GoldETF[] = [
-    {
-      id: "gld",
-      name: "SPDR Gold Shares",
-      symbol: "GLD",
-      price: 187.42,
-      change: 1.23,
-      changePercent: 0.66,
-      aum: "$58.2B",
-      expense: "0.40%",
-      chartData: generateChartData(185, 0.5)
-    },
-    {
-      id: "iau",
-      name: "iShares Gold Trust",
-      symbol: "IAU",
-      price: 38.75,
-      change: 0.28,
-      changePercent: 0.73,
-      aum: "$27.4B",
-      expense: "0.25%",
-      chartData: generateChartData(38, 0.3)
-    },
-    {
-      id: "sgol",
-      name: "Aberdeen Standard Physical Gold",
-      symbol: "SGOL",
-      price: 19.32,
-      change: 0.14,
-      changePercent: 0.73,
-      aum: "$2.8B",
-      expense: "0.17%",
-      chartData: generateChartData(19, 0.2)
+  const [etfs, setETFs] = useState<ETF[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    async function fetchETFs() {
+      try {
+        const response = await fetch("/api/gold-etfs");
+        if (!response.ok) throw new Error("Failed to fetch ETF data");
+        
+        const data = await response.json();
+        setETFs(data);
+      } catch (error) {
+        console.error("Error fetching ETFs:", error);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
     }
-  ];
-  
-  function generateChartData(basePrice: number, volatility: number) {
-    const data = [];
-    const today = new Date();
-    
-    for (let i = 30; i >= 0; i--) {
-      const date = new Date(today);
-      date.setDate(date.getDate() - i);
-      
-      // Create some random price movement
-      const randomFactor = (Math.random() * 2 - 1) * volatility;
-      const trendFactor = i / 60; // Slight upward trend
-      const price = basePrice - trendFactor + randomFactor;
-      
-      data.push({
-        date: date.toISOString().split('T')[0],
-        price: price
-      });
-    }
-    
-    return data;
-  }
-  
+
+    fetchETFs();
+  }, []);
+
   return (
-    <div>
-      <h2 className="text-2xl font-bold mb-4">Gold ETFs</h2>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {etfs.map((etf) => (
-          <Card key={etf.id} className="overflow-hidden">
-            <CardHeader className="pb-2">
-              <div className="flex justify-between items-start">
-                <div>
-                  <CardTitle>{etf.symbol}</CardTitle>
-                  <CardDescription>{etf.name}</CardDescription>
-                </div>
-                <div className="text-right">
-                  <div className="text-xl font-bold">${etf.price.toFixed(2)}</div>
-                  <div className={etf.change >= 0 ? "text-green-500" : "text-red-500"}>
-                    {etf.change >= 0 ? "+" : ""}{etf.change.toFixed(2)} ({etf.changePercent.toFixed(2)}%)
-                  </div>
-                </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="h-[120px] mt-2">
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart
-                    data={etf.chartData}
-                    margin={{ top: 5, right: 5, left: 5, bottom: 5 }}
-                  >
-                    <defs>
-                      <linearGradient id={`color${etf.id}`} x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="hsl(var(--chart-1))" stopOpacity={0.8} />
-                        <stop offset="95%" stopColor="hsl(var(--chart-1))" stopOpacity={0} />
-                      </linearGradient>
-                    </defs>
-                    <XAxis 
-                      dataKey="date" 
-                      hide={true}
-                    />
-                    <YAxis 
-                      domain={['auto', 'auto']}
-                      hide={true}
-                    />
-                    <Tooltip 
-                      contentStyle={{ 
-                        backgroundColor: 'hsl(var(--card))', 
-                        borderColor: 'hsl(var(--border))',
-                        color: 'hsl(var(--card-foreground))'
-                      }}
-                      formatter={(value) => [`$${Number(value).toFixed(2)}`, 'Price']}
-                      labelFormatter={(label) => `Date: ${new Date(label).toLocaleDateString()}`}
-                    />
-                    <Area 
-                      type="monotone" 
-                      dataKey="price" 
-                      stroke="hsl(var(--chart-1))" 
-                      fillOpacity={1} 
-                      fill={`url(#color${etf.id})`} 
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              </div>
-              <div className="grid grid-cols-2 gap-2 mt-4 text-sm">
-                <div>
-                  <span className="text-muted-foreground">AUM:</span> {etf.aum}
-                </div>
-                <div>
-                  <span className="text-muted-foreground">Expense Ratio:</span> {etf.expense}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Gold ETFs</CardTitle>
+        <CardDescription>Top gold-backed exchange-traded funds</CardDescription>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <p className="text-muted-foreground">Loading ETF data...</p>
+        ) : error ? (
+          <p className="text-red-500">Error loading data</p>
+        ) : (
+          <div className="rounded-md border">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b bg-muted/50">
+                  <th className="py-3 px-4 text-left font-medium">Symbol</th>
+                  <th className="py-3 px-4 text-left font-medium hidden md:table-cell">Company</th>
+                  <th className="py-3 px-4 text-right font-medium">Price</th>
+                  <th className="py-3 px-4 text-right font-medium">Change</th>
+                  <th className="py-3 px-4 text-right font-medium hidden md:table-cell">Volume</th>
+                </tr>
+              </thead>
+              <tbody>
+                {etfs.map((etf) => (
+                  <tr key={etf.symbol} className="border-b">
+                    <td className="py-3 px-4 font-medium">{etf.symbol}</td>
+                    <td className="py-3 px-4 hidden md:table-cell">{etf.name}</td>
+                    <td className="py-3 px-4 text-right">${etf.price.toFixed(2)}</td>
+                    <td className={`py-3 px-4 text-right ${etf.change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
+                      <div className="flex items-center justify-end">
+                        {etf.change >= 0 ? 
+                          <ArrowUp className="h-4 w-4 mr-1" /> : 
+                          <ArrowDown className="h-4 w-4 mr-1" />
+                        }
+                        <span>
+                          {etf.change.toFixed(2)} ({etf.changePercent.toFixed(2)}%)
+                        </span>
+                      </div>
+                    </td>
+                    <td className="py-3 px-4 text-right hidden md:table-cell">{etf.volume}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="text-xs text-muted-foreground mt-2 text-right">
+          *Market data delayed by at least 15 minutes
+        </p>
+      </CardContent>
+    </Card>
   );
 }
