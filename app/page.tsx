@@ -20,8 +20,8 @@ export default function Home() {
           <KaratPrices />
         </div>
         
-        <div className="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6">
-          <PriceCard />
+        <div className="mt-12 ">
+
           <PriceChart />
         </div>
         

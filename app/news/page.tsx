@@ -1,10 +1,4 @@
-"use client";
 
-import { useEffect, useState } from "react";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { getMarketNews } from "@/lib/data";
-import { ExternalLink } from "lucide-react";
-import Link from "next/link";
 import { NewsSection } from "@/components/news-section";
 
 export default function NewsPage() {
