@@ -44,14 +44,15 @@ export function PriceChart() {
 
         const result = await response.json();
         const formattedData: ChartData[] = result.historicalData
-          .map((item: HistoricalDataItem) => {
-            const [day, month, year] = item.Date.split(" ")[0].split("-");
-            return {
-              date: new Date(`${year}-${month}-${day}`),
-              price: item.Close,
-            };
-          })
-          .sort((a, b) => a.date.getTime() - b.date.getTime());
+  .map((item: HistoricalDataItem) => {
+    const [day, month, year] = item.Date.split(" ")[0].split("-");
+    return {
+      date: new Date(`${year}-${month}-${day}`),
+      price: item.Close,
+    };
+  })
+  .sort((a: ChartData, b: ChartData) => a.date.getTime() - b.date.getTime()); // Add explicit types
+
 
         setData(formattedData);
       } catch (error) {
