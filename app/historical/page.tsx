@@ -171,7 +171,6 @@ export default function HistoricalDataPage() {
         </Tabs>
       </div>
       
-      <Footer />
     </div>
   );
 }

@@ -1,12 +1,6 @@
 import LivePriceClient from "./livePriceClient";
 import { PriceCard } from "@/components/price-card";
 import { PriceChart } from "@/components/price-chart";
-import { Footer } from "@/components/footer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Button } from "@/components/ui/button";
-import { ChevronDown } from "lucide-react";
 
 export default function LivePricePage() {
   return (
@@ -35,7 +29,6 @@ export default function LivePricePage() {
         </div>
       </div>
 
-      <Footer />
     </div>
   );
 }

@@ -7,6 +7,7 @@ import { Toaster } from '@/components/ui/toaster';
 import { Toaster as SonnerToaster } from '@/components/ui/sonner';
 import Navbar from '@/components/navbar';
 import { Metadata } from 'next';
+import { Footer } from '@/components/footer';
 
 
 // Load Inter font with display: swap to prevent FOIT (Flash of Invisible Text)
@@ -42,6 +43,8 @@ export default function RootLayout({
           <main>{children}</main>
           <Toaster />
           <SonnerToaster />
+                <Footer />
+          
         </ThemeProvider>
       </body>
     </html>
