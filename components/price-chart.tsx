@@ -12,7 +12,7 @@ interface HistoricalDataItem {
   volume: number | null;
 }
 
-export default function PriceChart() {
+export  function PriceChart() {
   const [data, setData] = useState<HistoricalDataItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
