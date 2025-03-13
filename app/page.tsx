@@ -1,12 +1,8 @@
 import { HeroSection } from "@/components/hero-section";
-import { NewsSection } from "@/components/news-section";
-import { PriceCard } from "@/components/price-card";
 import { PriceChart } from "@/components/price-chart";
 import { KaratPrices } from "@/components/karat-prices";
 import { GoldStocks } from "@/components/gold-stocks";
 import { GoldETFs } from "@/components/gold-etfs";
-import { Footer } from "@/components/footer";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import Goldtable from "@/components/gold-table";
 
 export default function Home() {
