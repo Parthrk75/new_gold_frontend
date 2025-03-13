@@ -10,7 +10,6 @@ import { cn } from "@/lib/utils";
 const navItems = [
   { name: "Home", href: "/" },
   { name: "Live Prices", href: "/live-prices" },
-  { name: "Historical Data", href: "/historical" },
   { name: "Market News", href: "/news" },
   { name: "About", href: "/about" },
 ];

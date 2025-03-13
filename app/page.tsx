@@ -1,9 +1,8 @@
 import { HeroSection } from "@/components/hero-section";
-import { PriceChart } from "@/components/price-chart";
 import { KaratPrices } from "@/components/karat-prices";
 import { GoldStocks } from "@/components/gold-stocks";
 import { GoldETFs } from "@/components/gold-etfs";
-import Goldtable from "@/components/gold-table";
+import PriceChart from "@/components/price-chart";
 
 export default function Home() {
   return (
@@ -31,7 +30,6 @@ export default function Home() {
         </div>
         <div>
 
-        <Goldtable/>
         </div>
         
         
