@@ -1,114 +1,35 @@
 // "use client";
 
 // import { PriceChart } from "@/components/price-chart";
-// import { Footer } from "@/components/footer";
+// import Goldtable from "@/components/gold-table";
 // import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 // import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-// import { Button } from "@/components/ui/button";
-// import { Calendar } from "@/components/ui/calendar";
-// import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-// import { CalendarIcon, Download } from "lucide-react";
-// import { format } from "date-fns";
-// import { useState } from "react";
-// import { cn } from "@/lib/utils";
 
 // export default function HistoricalDataPage() {
-//   const [date, setDate] = useState<Date | undefined>(new Date());
-  
 //   return (
 //     <div>
 //       <div className="bg-muted py-12">
 //         <div className="container">
 //           <h1 className="text-4xl font-bold mb-4">Historical Gold Prices</h1>
 //           <p className="text-muted-foreground max-w-2xl">
-//             Analyze gold price trends over time with our comprehensive historical data. Filter by date range and export data for your own analysis.
+//             Analyze gold price trends over time with our comprehensive historical data.
 //           </p>
 //         </div>
 //       </div>
-      
+
 //       <div className="container py-12">
 //         <Card className="mb-8">
 //           <CardHeader>
 //             <CardTitle>Data Filters</CardTitle>
-//             <CardDescription>
-//               Customize your view of historical gold price data
-//             </CardDescription>
+//             <CardDescription>Customize your view of historical gold price data</CardDescription>
 //           </CardHeader>
 //           <CardContent>
-//             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-//               <div>
-//                 <label className="text-sm font-medium mb-2 block">Date Range</label>
-//                 <Select defaultValue="30d">
-//                   <SelectTrigger>
-//                     <SelectValue placeholder="Select range" />
-//                   </SelectTrigger>
-//                   <SelectContent>
-//                     <SelectItem value="7d">Last 7 days</SelectItem>
-//                     <SelectItem value="30d">Last 30 days</SelectItem>
-//                     <SelectItem value="90d">Last 90 days</SelectItem>
-//                     <SelectItem value="1y">Last year</SelectItem>
-//                     <SelectItem value="5y">Last 5 years</SelectItem>
-//                     <SelectItem value="custom">Custom range</SelectItem>
-//                   </SelectContent>
-//                 </Select>
-//               </div>
-              
-//               <div>
-//                 <label className="text-sm font-medium mb-2 block">Start Date</label>
-//                 <Popover>
-//                   <PopoverTrigger asChild>
-//                     <Button
-//                       variant={"outline"}
-//                       className={cn(
-//                         "w-full justify-start text-left font-normal",
-//                         !date && "text-muted-foreground"
-//                       )}
-//                     >
-//                       <CalendarIcon className="mr-2 h-4 w-4" />
-//                       {date ? format(date, "PPP") : <span>Pick a date</span>}
-//                     </Button>
-//                   </PopoverTrigger>
-//                   <PopoverContent className="w-auto p-0">
-//                     <Calendar
-//                       mode="single"
-//                       selected={date}
-//                       onSelect={setDate}
-//                       initialFocus
-//                     />
-//                   </PopoverContent>
-//                 </Popover>
-//               </div>
-              
-//               <div>
-//                 <label className="text-sm font-medium mb-2 block">Currency</label>
-//                 <Select defaultValue="usd">
-//                   <SelectTrigger>
-//                     <SelectValue placeholder="Select currency" />
-//                   </SelectTrigger>
-//                   <SelectContent>
-//                     <SelectItem value="usd">USD</SelectItem>
-//                     <SelectItem value="eur">EUR</SelectItem>
-//                     <SelectItem value="gbp">GBP</SelectItem>
-//                     <SelectItem value="jpy">JPY</SelectItem>
-//                   </SelectContent>
-//                 </Select>
-//               </div>
-              
-//               <div className="flex items-end">
-//                 <Button className="w-full">Apply Filters</Button>
-//               </div>
-//             </div>
-            
 //             <div className="mt-4 flex justify-end">
-//               <Button variant="outline" size="sm" className="flex items-center">
-//                 <Download className="mr-2 h-4 w-4" />
-//                 Export Data
-//               </Button>
+//               <button className="px-4 py-2 bg-blue-600 text-white rounded-md">Export Data</button>
 //             </div>
 //           </CardContent>
 //         </Card>
-        
+
 //         <Tabs defaultValue="chart" className="w-full">
 //           <TabsList className="grid w-full max-w-[400px] grid-cols-2">
 //             <TabsTrigger value="chart">Chart View</TabsTrigger>
@@ -118,59 +39,11 @@
 //             <PriceChart />
 //           </TabsContent>
 //           <TabsContent value="table" className="mt-4">
-//             <Card>
-//               <CardHeader>
-//                 <CardTitle>Historical Price Data</CardTitle>
-//                 <CardDescription>
-//                   Daily gold prices in USD per troy ounce
-//                 </CardDescription>
-//               </CardHeader>
-//               <CardContent>
-//                 <div className="rounded-md border">
-//                   <table className="w-full">
-//                     <thead>
-//                       <tr className="border-b bg-muted/50">
-//                         <th className="py-3 px-4 text-left font-medium">Date</th>
-//                         <th className="py-3 px-4 text-left font-medium">Open</th>
-//                         <th className="py-3 px-4 text-left font-medium">High</th>
-//                         <th className="py-3 px-4 text-left font-medium">Low</th>
-//                         <th className="py-3 px-4 text-left font-medium">Close</th>
-//                         <th className="py-3 px-4 text-left font-medium">Change</th>
-//                       </tr>
-//                     </thead>
-//                     <tbody>
-//                       {Array.from({ length: 10 }).map((_, i) => {
-//                         const date = new Date();
-//                         date.setDate(date.getDate() - i);
-//                         const basePrice = 2350 - i * 5 + Math.random() * 20 - 10;
-//                         const open = basePrice - 5 + Math.random() * 10;
-//                         const high = open + 5 + Math.random() * 15;
-//                         const low = open - 5 - Math.random() * 15;
-//                         const close = low + Math.random() * (high - low);
-//                         const change = ((close - open) / open) * 100;
-                        
-//                         return (
-//                           <tr key={i} className="border-b">
-//                             <td className="py-3 px-4">{format(date, "MMM dd, yyyy")}</td>
-//                             <td className="py-3 px-4">${open.toFixed(2)}</td>
-//                             <td className="py-3 px-4">${high.toFixed(2)}</td>
-//                             <td className="py-3 px-4">${low.toFixed(2)}</td>
-//                             <td className="py-3 px-4">${close.toFixed(2)}</td>
-//                             <td className={`py-3 px-4 ${change >= 0 ? 'text-green-500' : 'text-red-500'}`}>
-//                               {change >= 0 ? '+' : ''}{change.toFixed(2)}%
-//                             </td>
-//                           </tr>
-//                         );
-//                       })}
-//                     </tbody>
-//                   </table>
-//                 </div>
-//               </CardContent>
-//             </Card>
+//                     <Goldtable/>
+            
 //           </TabsContent>
 //         </Tabs>
 //       </div>
-      
 //     </div>
 //   );
 // }
@@ -179,56 +52,150 @@
 
 
 
-
-
-
-
 "use client";
-
-import { PriceChart } from "@/components/price-chart";
-import Goldtable from "@/components/gold-table";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { useState, useEffect, useMemo } from "react";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-export default function HistoricalDataPage() {
+interface HistoricalDataItem {
+  date: string | null;
+  open: number | null;
+  high: number | null;
+  low: number | null;
+  close: number | null;
+  volume: number | null;
+}
+
+export default function GoldPriceChart() {
+  const [data, setData] = useState<HistoricalDataItem[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+  const [days, setDays] = useState<number>(7); // Default: Last 7 days
+
+  async function fetchData() {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/historical?timestamp=${Date.now()}`);
+      if (!response.ok) throw new Error(`Failed to fetch data: ${response.statusText}`);
+
+      const result = await response.json();
+      if (!result.historicalData || !Array.isArray(result.historicalData)) {
+        throw new Error("Invalid data format received.");
+      }
+
+      const sortedData = result.historicalData
+        .filter((item: HistoricalDataItem) => item.date)
+        .sort((a: HistoricalDataItem, b: HistoricalDataItem) =>
+          new Date(a.date!).getTime() - new Date(b.date!).getTime()
+        );
+
+      setData(sortedData);
+    } catch (err: any) {
+      setError(err.message || "Error fetching data");
+      console.error("Fetch Error:", err);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const filteredData = useMemo(() => {
+    if (!data.length) return [];
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+    return data.filter((item) => item.date && new Date(item.date) >= cutoffDate);
+  }, [days, data]);
+
+  useEffect(() => {
+    fetchData();
+    const interval = setInterval(fetchData, 120000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
-    <div>
-      <div className="bg-muted py-12">
-        <div className="container">
-          <h1 className="text-4xl font-bold mb-4">Historical Gold Prices</h1>
-          <p className="text-muted-foreground max-w-2xl">
-            Analyze gold price trends over time with our comprehensive historical data.
-          </p>
-        </div>
-      </div>
+    <div className="p-6 bg-black text-white shadow-md rounded-lg">
+      <h2 className="text-2xl font-semibold mb-4">Gold Price History</h2>
 
-      <div className="container py-12">
-        <Card className="mb-8">
-          <CardHeader>
-            <CardTitle>Data Filters</CardTitle>
-            <CardDescription>Customize your view of historical gold price data</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="mt-4 flex justify-end">
-              <button className="px-4 py-2 bg-blue-600 text-white rounded-md">Export Data</button>
-            </div>
-          </CardContent>
-        </Card>
+      {/* Tabs for selecting timeframe */}
+      <Tabs defaultValue="chart" className="w-full mb-4">
+        <TabsList className="grid w-full max-w-[600px] grid-cols-7 bg-gray-800 rounded-md p-2">
+          <TabsTrigger value="7" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(7)}>7D</TabsTrigger>
+          <TabsTrigger value="14" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(14)}>14D</TabsTrigger>
+          <TabsTrigger value="30" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(30)}>30D</TabsTrigger>
+          <TabsTrigger value="60" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(60)}>60D</TabsTrigger>
+          <TabsTrigger value="180" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(180)}>6M</TabsTrigger>
+          <TabsTrigger value="365" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(365)}>1Y</TabsTrigger>
+          <TabsTrigger value="1825" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(1825)}>5Y</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
-        <Tabs defaultValue="chart" className="w-full">
-          <TabsList className="grid w-full max-w-[400px] grid-cols-2">
-            <TabsTrigger value="chart">Chart View</TabsTrigger>
-            <TabsTrigger value="table">Table View</TabsTrigger>
-          </TabsList>
-          <TabsContent value="chart" className="mt-4">
-            <PriceChart />
-          </TabsContent>
-          <TabsContent value="table" className="mt-4">
-                    <Goldtable/>
-            
-          </TabsContent>
-        </Tabs>
-      </div>
+      {/* Chart & Table View Toggle */}
+      <Tabs defaultValue="chart" className="w-full">
+        <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-gray-800 rounded-md p-2">
+          <TabsTrigger value="chart" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2">Chart View</TabsTrigger>
+          <TabsTrigger value="table" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2">Table View</TabsTrigger>
+        </TabsList>
+
+        {/* Chart View */}
+        <TabsContent value="chart" className="mt-4 bg-gray-900 p-4 rounded-lg">
+          {loading ? (
+            <p className="text-gray-400">Loading...</p>
+          ) : error ? (
+            <p className="text-red-400">{error}</p>
+          ) : filteredData.length === 0 ? (
+            <p className="text-gray-400">No data available for the selected range.</p>
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={filteredData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString()} />
+                <YAxis domain={["auto", "auto"]} />
+                <Tooltip />
+                <Line type="monotone" dataKey="close" stroke="#FFD700" strokeWidth={2} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+        </TabsContent>
+
+        {/* Table View */}
+        <TabsContent value="table" className="mt-4 bg-gray-900 p-4 rounded-lg">
+          {loading ? (
+            <p className="text-gray-400">Loading...</p>
+          ) : error ? (
+            <p className="text-red-400">{error}</p>
+          ) : filteredData.length === 0 ? (
+            <p className="text-gray-400">No data available for the selected range.</p>
+          ) : (
+            <table className="w-full border-collapse border border-gray-600">
+              <thead className="bg-gray-700">
+                <tr>
+                  <th className="border border-gray-600 p-2">Date</th>
+                  <th className="border border-gray-600 p-2">Open</th>
+                  <th className="border border-gray-600 p-2">High</th>
+                  <th className="border border-gray-600 p-2">Low</th>
+                  <th className="border border-gray-600 p-2">Close</th>
+                  <th className="border border-gray-600 p-2">Volume</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredData.map((item, index) => (
+                  <tr key={index} className="text-center border-t border-gray-600">
+                    <td className="border border-gray-600 p-2">
+                      {item.date ? new Date(item.date).toLocaleDateString() : "N/A"}
+                    </td>
+                    <td className="border border-gray-600 p-2">{item.open?.toFixed(2) ?? "N/A"}</td>
+                    <td className="border border-gray-600 p-2">{item.high?.toFixed(2) ?? "N/A"}</td>
+                    <td className="border border-gray-600 p-2">{item.low?.toFixed(2) ?? "N/A"}</td>
+                    <td className="border border-gray-600 p-2 font-bold">{item.close?.toFixed(2) ?? "N/A"}</td>
+                    <td className="border border-gray-600 p-2">{item.volume ?? "N/A"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }
