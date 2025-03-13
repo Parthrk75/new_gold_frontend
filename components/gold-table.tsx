@@ -111,10 +111,9 @@
 
 
 
-
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 
 interface HistoricalDataItem {
   date: string;
@@ -127,7 +126,6 @@ interface HistoricalDataItem {
 
 export default function GoldPriceChart() {
   const [data, setData] = useState<HistoricalDataItem[]>([]);
-  const [filteredData, setFilteredData] = useState<HistoricalDataItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [days, setDays] = useState<number>(7); // Default filter: Last 7 days
@@ -138,39 +136,40 @@ export default function GoldPriceChart() {
     setError(null);
 
     try {
-      // Force refresh by adding a timestamp to prevent caching
-      const response = await fetch(`/api/historical?timestamp=${new Date().getTime()}`);
-      if (!response.ok) throw new Error("Failed to fetch data");
+      const response = await fetch(`/api/historical?timestamp=${Date.now()}`); // Prevent caching
+      if (!response.ok) throw new Error(`Failed to fetch data: ${response.statusText}`);
 
       const result = await response.json();
-      
-      // Ensure the data is sorted by date
-      const sortedData = result.historicalData.sort((a: HistoricalDataItem, b: HistoricalDataItem) =>
-        new Date(a.date).getTime() - new Date(b.date).getTime()
+
+      // Ensure data is sorted (if not already sorted)
+      const sortedData = result.historicalData.sort(
+        (a: HistoricalDataItem, b: HistoricalDataItem) => 
+          new Date(a.date).getTime() - new Date(b.date).getTime()
       );
 
       setData(sortedData);
-      setFilteredData(sortedData.slice(-days));
-    } catch (err) {
-      setError("Error fetching data");
-      console.error(err);
+    } catch (err: any) {
+      setError(err.message || "Error fetching data");
+      console.error("Fetch Error:", err);
     } finally {
       setLoading(false);
     }
   }
 
-  // Update filtered data when the user selects a different time range
-  useEffect(() => {
-    console.log("Filtering data for last", days, "days");
-    console.log("Available data:", data); // ✅ Debug API data in console
-    setFilteredData(data.slice(-days));
+  // Filter data based on the selected days
+  const filteredData = useMemo(() => {
+    if (!data.length) return [];
+    const cutoffDate = new Date();
+    cutoffDate.setDate(cutoffDate.getDate() - days);
+
+    return data.filter((item) => new Date(item.date) >= cutoffDate);
   }, [days, data]);
 
   // Fetch data initially and refresh every 2 minutes
   useEffect(() => {
     fetchData();
     const interval = setInterval(fetchData, 120000);
-    return () => clearInterval(interval); // Cleanup on unmount
+    return () => clearInterval(interval); // Cleanup
   }, []);
 
   return (
@@ -199,6 +198,8 @@ export default function GoldPriceChart() {
         <p className="text-gray-500">Loading...</p>
       ) : error ? (
         <p className="text-red-500">{error}</p>
+      ) : filteredData.length === 0 ? (
+        <p className="text-gray-500">No data available for the selected range.</p>
       ) : (
         <table className="w-full border-collapse border border-gray-300 dark:border-gray-700">
           <thead className="bg-gray-100 dark:bg-gray-800">
@@ -215,10 +216,10 @@ export default function GoldPriceChart() {
             {filteredData.map((item, index) => (
               <tr key={index} className="text-center border-t">
                 <td className="border p-2">{new Date(item.date).toLocaleDateString()}</td>
-                <td className="border p-2">{item.open ?? "N/A"}</td>
-                <td className="border p-2">{item.high ?? "N/A"}</td>
-                <td className="border p-2">{item.low ?? "N/A"}</td>
-                <td className="border p-2 font-bold">{item.close ?? "N/A"}</td>
+                <td className="border p-2">{item.open?.toFixed(2) ?? "N/A"}</td>
+                <td className="border p-2">{item.high?.toFixed(2) ?? "N/A"}</td>
+                <td className="border p-2">{item.low?.toFixed(2) ?? "N/A"}</td>
+                <td className="border p-2 font-bold">{item.close?.toFixed(2) ?? "N/A"}</td>
                 <td className="border p-2">{item.volume ?? "N/A"}</td>
               </tr>
             ))}
