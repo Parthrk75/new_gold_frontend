@@ -53,149 +53,152 @@
 
 
 "use client";
-import { useState, useEffect, useMemo } from "react";
-import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+
+import { useEffect, useState, useMemo } from "react";
+import { Line } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  LineElement,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  Tooltip,
+  Legend,
+} from "chart.js";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useTheme } from "next-themes"; 
+
+ChartJS.register(LineElement, CategoryScale, LinearScale, PointElement, Tooltip, Legend);
 
 interface HistoricalDataItem {
-  date: string | null;
-  open: number | null;
-  high: number | null;
-  low: number | null;
-  close: number | null;
-  volume: number | null;
+  date: string;
+  close: number;
+}
+
+interface ChartData {
+  date: Date;
+  price: number;
 }
 
 export default function GoldPriceChart() {
-  const [data, setData] = useState<HistoricalDataItem[]>([]);
+  const { theme } = useTheme(); 
+  const [data, setData] = useState<ChartData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [error, setError] = useState<string | null>(null);
-  const [days, setDays] = useState<number>(7); // Default: Last 7 days
-
-  async function fetchData() {
-    setLoading(true);
-    setError(null);
-
-    try {
-      const response = await fetch(`/api/historical?timestamp=${Date.now()}`);
-      if (!response.ok) throw new Error(`Failed to fetch data: ${response.statusText}`);
-
-      const result = await response.json();
-      if (!result.historicalData || !Array.isArray(result.historicalData)) {
-        throw new Error("Invalid data format received.");
-      }
-
-      const sortedData = result.historicalData
-        .filter((item: HistoricalDataItem) => item.date)
-        .sort((a: HistoricalDataItem, b: HistoricalDataItem) =>
-          new Date(a.date!).getTime() - new Date(b.date!).getTime()
-        );
-
-      setData(sortedData);
-    } catch (err: any) {
-      setError(err.message || "Error fetching data");
-      console.error("Fetch Error:", err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const filteredData = useMemo(() => {
-    if (!data.length) return [];
-    const cutoffDate = new Date();
-    cutoffDate.setDate(cutoffDate.getDate() - days);
-    return data.filter((item) => item.date && new Date(item.date) >= cutoffDate);
-  }, [days, data]);
+  const [error, setError] = useState<boolean>(false);
+  const [timeframe, setTimeframe] = useState<"7d" | "14d" | "30d" | "60d" | "180d" | "365d" | "1825d">("7d");
 
   useEffect(() => {
+    async function fetchData() {
+      setLoading(true);
+      setError(false);
+      try {
+        const response = await fetch("/api/historicalData");
+        if (!response.ok) throw new Error("Failed to fetch data");
+        const result = await response.json();
+        const formattedData: ChartData[] = result.historicalData
+          .map((item: HistoricalDataItem) => {
+            const [year, month, day] = item.date.split("-");
+            return {
+              date: new Date(`${year}-${month}-${day}`),
+              price: item.close,
+            };
+          })
+          .sort((a: ChartData, b: ChartData) => a.date.getTime() - b.date.getTime());
+        setData(formattedData);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError(true);
+      } finally {
+        setLoading(false);
+      }
+    }
     fetchData();
-    const interval = setInterval(fetchData, 120000);
-    return () => clearInterval(interval);
   }, []);
 
+  const timeframeMap: Record<typeof timeframe, number> = {
+    "7d": 7,
+    "14d": 14,
+    "30d": 30,
+    "60d": 60,
+    "180d": 180,
+    "365d": 365,
+    "1825d": 1825,
+  };
+
+  const filteredData = useMemo(() => {
+    return data.slice(-timeframeMap[timeframe]);
+  }, [data, timeframe]);
+
+  const formatDate = (date: Date): string =>
+    date.toLocaleDateString("en-US", { day: "numeric", month: "short" });
+
+  const textColor = theme === "dark" ? "#ffffff" : "#1f2937";
+  const gridColor = theme === "dark" ? "#333333" : "#e5e5e5";
+  const tooltipBg = theme === "dark" ? "#1f2937" : "#ffffff";
+
+  const chartData = useMemo(
+    () => ({
+      labels: filteredData.map((item) => formatDate(item.date)),
+      datasets: [
+        {
+          label: "Gold Price (USD)",
+          data: filteredData.map((item) => item.price),
+          borderColor: "#00FF57",
+          borderWidth: 2,
+          backgroundColor: "rgba(0, 255, 87, 0.3)",
+          fill: true,
+          tension: 0.4,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+        },
+      ],
+    }),
+    [filteredData]
+  );
+
+  const chartOptions = useMemo(
+    () => ({
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: { enabled: true, backgroundColor: tooltipBg },
+      },
+      scales: {
+        x: { grid: { display: false }, ticks: { color: textColor } },
+        y: { grid: { color: gridColor }, ticks: { color: textColor } },
+      },
+    }),
+    [textColor, gridColor, tooltipBg]
+  );
+
   return (
-    <div className="p-6 bg-black text-white shadow-md rounded-lg">
-      <h2 className="text-2xl font-semibold mb-4">Gold Price History</h2>
-
-      {/* Tabs for selecting timeframe */}
-      <Tabs defaultValue="chart" className="w-full mb-4">
-        <TabsList className="grid w-full max-w-[600px] grid-cols-7 bg-gray-800 rounded-md p-2">
-          <TabsTrigger value="7" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(7)}>7D</TabsTrigger>
-          <TabsTrigger value="14" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(14)}>14D</TabsTrigger>
-          <TabsTrigger value="30" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(30)}>30D</TabsTrigger>
-          <TabsTrigger value="60" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(60)}>60D</TabsTrigger>
-          <TabsTrigger value="180" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(180)}>6M</TabsTrigger>
-          <TabsTrigger value="365" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(365)}>1Y</TabsTrigger>
-          <TabsTrigger value="1825" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2" onClick={() => setDays(1825)}>5Y</TabsTrigger>
+    <div className="col-span-3 min-w-0 overflow-hidden p-6 bg-white dark:bg-black shadow-lg rounded-xl">
+      <h2 className="text-2xl font-semibold text-gray-800 dark:text-white">Gold Price History</h2>
+      <p className="text-gray-500 dark:text-gray-300 mb-4">Historical gold prices (USD/oz)</p>
+      <Tabs defaultValue="7d" className="w-full mb-4" onValueChange={(value) => setTimeframe(value as any)}>
+        <TabsList className="grid w-full max-w-[600px] grid-cols-7">
+          <TabsTrigger value="7d">7D</TabsTrigger>
+          <TabsTrigger value="14d">14D</TabsTrigger>
+          <TabsTrigger value="30d">30D</TabsTrigger>
+          <TabsTrigger value="60d">60D</TabsTrigger>
+          <TabsTrigger value="180d">6M</TabsTrigger>
+          <TabsTrigger value="365d">1Y</TabsTrigger>
+          <TabsTrigger value="1825d">5Y</TabsTrigger>
         </TabsList>
       </Tabs>
-
-      {/* Chart & Table View Toggle */}
-      <Tabs defaultValue="chart" className="w-full">
-        <TabsList className="grid w-full max-w-[400px] grid-cols-2 bg-gray-800 rounded-md p-2">
-          <TabsTrigger value="chart" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2">Chart View</TabsTrigger>
-          <TabsTrigger value="table" className="text-gray-300 data-[state=active]:bg-gray-600 rounded-md px-4 py-2">Table View</TabsTrigger>
-        </TabsList>
-
-        {/* Chart View */}
-        <TabsContent value="chart" className="mt-4 bg-gray-900 p-4 rounded-lg">
-          {loading ? (
-            <p className="text-gray-400">Loading...</p>
-          ) : error ? (
-            <p className="text-red-400">{error}</p>
-          ) : filteredData.length === 0 ? (
-            <p className="text-gray-400">No data available for the selected range.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={filteredData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="date" tickFormatter={(date) => new Date(date).toLocaleDateString()} />
-                <YAxis domain={["auto", "auto"]} />
-                <Tooltip />
-                <Line type="monotone" dataKey="close" stroke="#FFD700" strokeWidth={2} />
-              </LineChart>
-            </ResponsiveContainer>
-          )}
-        </TabsContent>
-
-        {/* Table View */}
-        <TabsContent value="table" className="mt-4 bg-gray-900 p-4 rounded-lg">
-          {loading ? (
-            <p className="text-gray-400">Loading...</p>
-          ) : error ? (
-            <p className="text-red-400">{error}</p>
-          ) : filteredData.length === 0 ? (
-            <p className="text-gray-400">No data available for the selected range.</p>
-          ) : (
-            <table className="w-full border-collapse border border-gray-600">
-              <thead className="bg-gray-700">
-                <tr>
-                  <th className="border border-gray-600 p-2">Date</th>
-                  <th className="border border-gray-600 p-2">Open</th>
-                  <th className="border border-gray-600 p-2">High</th>
-                  <th className="border border-gray-600 p-2">Low</th>
-                  <th className="border border-gray-600 p-2">Close</th>
-                  <th className="border border-gray-600 p-2">Volume</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredData.map((item, index) => (
-                  <tr key={index} className="text-center border-t border-gray-600">
-                    <td className="border border-gray-600 p-2">
-                      {item.date ? new Date(item.date).toLocaleDateString() : "N/A"}
-                    </td>
-                    <td className="border border-gray-600 p-2">{item.open?.toFixed(2) ?? "N/A"}</td>
-                    <td className="border border-gray-600 p-2">{item.high?.toFixed(2) ?? "N/A"}</td>
-                    <td className="border border-gray-600 p-2">{item.low?.toFixed(2) ?? "N/A"}</td>
-                    <td className="border border-gray-600 p-2 font-bold">{item.close?.toFixed(2) ?? "N/A"}</td>
-                    <td className="border border-gray-600 p-2">{item.volume ?? "N/A"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </TabsContent>
-      </Tabs>
+      {loading ? (
+        <p className="text-muted-foreground">Loading chart data...</p>
+      ) : error ? (
+        <div className="text-red-500">
+          <p>Error loading data.</p>
+          <button className="mt-2 px-4 py-2 bg-red-500 text-white rounded" onClick={() => window.location.reload()}>Retry</button>
+        </div>
+      ) : (
+        <div className="w-full h-96">
+          <Line data={chartData} options={chartOptions} />
+        </div>
+      )}
     </div>
   );
 }
