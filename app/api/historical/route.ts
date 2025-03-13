@@ -26,31 +26,32 @@ import yahooFinance from "yahoo-finance2";
 
 export async function GET() {
   try {
-    const symbol = "GLD"; // Using GLD ETF as a proxy for gold prices
-    const period1 = new Date("2020-01-01").toISOString().split("T")[0]; // Start date
-    const period2 = new Date().toISOString().split("T")[0]; // End date (Today)
+    const symbol = "GLD"; // ETF for gold
+    const period1 = "2020-01-01"; // Start date
+    const period2 = new Date().toISOString().split("T")[0]; // Current date
 
-    const queryOptions = {
-      period1,
-      period2,
-      interval: "1d" as "1d" | "1wk" | "1mo"
+    const queryOptions = { 
+      period1, 
+      period2, 
+      interval: "1d" as "1d" 
     };
 
-    // Fetch historical data from Yahoo Finance
-    const historicalData = await yahooFinance.historical(symbol, queryOptions);
+    // Fetch historical data
+    const rawData = await yahooFinance.historical(symbol, queryOptions);
 
-    if (!historicalData || historicalData.length === 0) {
-      return NextResponse.json({ error: "No historical data available" }, { status: 404 });
+    if (!rawData || rawData.length === 0) {
+      throw new Error("No historical data available.");
     }
 
-    // Apply scaling factor to convert ETF price to gold spot price
+    // Apply the 10.77 scaling factor
     const scalingFactor = 10.77;
-    const formattedData = historicalData.map((entry) => ({
-      Date: new Date(entry.date).toISOString().split("T")[0], // Format date as YYYY-MM-DD
-      "Open (Spot Price USD)": entry.open ? (entry.open * scalingFactor).toFixed(2) : null,
-      "High (Spot Price USD)": entry.high ? (entry.high * scalingFactor).toFixed(2) : null,
-      "Low (Spot Price USD)": entry.low ? (entry.low * scalingFactor).toFixed(2) : null,
-      "Close (Spot Price USD)": entry.close ? (entry.close * scalingFactor).toFixed(2) : null
+    const formattedData = rawData.map((entry) => ({
+      date: entry.date, // Keep date as returned by Yahoo Finance
+      open: entry.open ? entry.open * scalingFactor : null,
+      high: entry.high ? entry.high * scalingFactor : null,
+      low: entry.low ? entry.low * scalingFactor : null,
+      close: entry.close ? entry.close * scalingFactor : null,
+      volume: entry.volume ?? null, // Keep volume as is
     }));
 
     return NextResponse.json({ historicalData: formattedData });

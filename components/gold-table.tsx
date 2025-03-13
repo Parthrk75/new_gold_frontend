@@ -116,7 +116,7 @@
 import { useState, useEffect, useMemo } from "react";
 
 interface HistoricalDataItem {
-  date: string;
+  date: string | null;
   open: number | null;
   high: number | null;
   low: number | null;
@@ -128,7 +128,7 @@ export default function GoldPriceChart() {
   const [data, setData] = useState<HistoricalDataItem[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
-  const [days, setDays] = useState<number>(7); // Default filter: Last 7 days
+  const [days, setDays] = useState<number>(7); // Default: Last 7 days
 
   // Function to fetch data
   async function fetchData() {
@@ -141,11 +141,17 @@ export default function GoldPriceChart() {
 
       const result = await response.json();
 
-      // Ensure data is sorted (if not already sorted)
-      const sortedData = result.historicalData.sort(
-        (a: HistoricalDataItem, b: HistoricalDataItem) => 
-          new Date(a.date).getTime() - new Date(b.date).getTime()
-      );
+      // Validate API response
+      if (!result.historicalData || !Array.isArray(result.historicalData)) {
+        throw new Error("Invalid data format received.");
+      }
+
+      // Ensure the data is sorted by date (if not already)
+      const sortedData = result.historicalData
+        .filter((item: HistoricalDataItem) => item.date) // Remove invalid entries
+        .sort((a: HistoricalDataItem, b: HistoricalDataItem) =>
+          new Date(a.date!).getTime() - new Date(b.date!).getTime()
+        );
 
       setData(sortedData);
     } catch (err: any) {
@@ -162,7 +168,7 @@ export default function GoldPriceChart() {
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - days);
 
-    return data.filter((item) => new Date(item.date) >= cutoffDate);
+    return data.filter((item) => item.date && new Date(item.date) >= cutoffDate);
   }, [days, data]);
 
   // Fetch data initially and refresh every 2 minutes
@@ -215,7 +221,9 @@ export default function GoldPriceChart() {
           <tbody>
             {filteredData.map((item, index) => (
               <tr key={index} className="text-center border-t">
-                <td className="border p-2">{new Date(item.date).toLocaleDateString()}</td>
+                <td className="border p-2">
+                  {item.date ? new Date(item.date).toLocaleDateString() : "N/A"}
+                </td>
                 <td className="border p-2">{item.open?.toFixed(2) ?? "N/A"}</td>
                 <td className="border p-2">{item.high?.toFixed(2) ?? "N/A"}</td>
                 <td className="border p-2">{item.low?.toFixed(2) ?? "N/A"}</td>
