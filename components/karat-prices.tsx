@@ -115,40 +115,44 @@ export function KaratPrices() {
   const [lastUpdated, setLastUpdated] = useState<string>("");
   const lastPricesRef = useRef<KaratPrice[]>([]);
 
+  function formatDateTime(timestamp: string) {
+    const date = new Date(timestamp);
+    return date.toLocaleString("en-US", {
+      timeZone: "America/New_York",
+      weekday: "short",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true,
+    });
+  }
+
   useEffect(() => {
     async function fetchPrices() {
       try {
-        console.log("Fetching live gold price...");
-        const response = await fetch("https://api.gold-api.com/price/XAU");
-        if (!response.ok) throw new Error("Failed to fetch live gold prices");
+        console.log("Fetching gold prices from API...");
+        const response = await fetch("/api/gold-prices"); // Fetch from your API
+        if (!response.ok) throw new Error("Failed to fetch gold prices");
 
-        const result = await response.json();
-        if (!result || !result.price) throw new Error("Invalid API response");
+        const { prices: newPrices, updatedAt } = await response.json();
+        if (!newPrices || !updatedAt) throw new Error("Invalid API response");
 
-        const gold24k = parseFloat(result.price);
-        if (isNaN(gold24k)) throw new Error("Invalid gold price data");
-
-        const karatMultipliers = {
-          "24K": 1,
-          "22K": 0.9167,
-          "18K": 0.75,
-          "14K": 0.5833,
-        };
-
-        const newPrices = Object.entries(karatMultipliers).map(([karat, multiplier]) => {
-          const price = gold24k * multiplier;
-          const lastPrice = lastPricesRef.current.find((p) => p.karat === karat)?.price || price;
-          const change = price - lastPrice;
+        // Calculate price changes
+        const updatedPrices = newPrices.map((price: KaratPrice, index: number) => {
+          const lastPrice = lastPricesRef.current[index]?.price || price.price;
+          const change = price.price - lastPrice;
           const changePercent = lastPrice !== 0 ? (change / lastPrice) * 100 : 0;
-
-          return { karat, price, change, changePercent };
+          return { ...price, change, changePercent };
         });
 
-        setPrices(newPrices);
-        setLastUpdated(new Date().toLocaleTimeString());
-        lastPricesRef.current = newPrices;
+        setPrices(updatedPrices);
+        setLastUpdated(formatDateTime(updatedAt)); // Convert to New York Time
+        lastPricesRef.current = updatedPrices;
       } catch (error) {
-        console.error("Error fetching live prices:", error);
+        console.error("Error fetching gold prices:", error);
       }
     }
 
@@ -174,7 +178,9 @@ export function KaratPrices() {
                 {Math.abs(price.change).toFixed(2)} ({Math.abs(price.changePercent).toFixed(2)}%)
               </span>
             </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">Per troy ounce • Updated {lastUpdated}</p>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mt-2">
+              Last Updated (New York Time): {lastUpdated}
+            </p>
           </CardContent>
         </Card>
       ))}
