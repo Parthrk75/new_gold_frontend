@@ -4,6 +4,7 @@ import { GoldETFs } from "@/components/gold-etfs";
 import { PriceChart } from "@/components/price-chart";
 import { KaratPrices } from "@/components/karat-prices";
 
+
 export default function Home() {
   return (
     <div>
@@ -14,6 +15,7 @@ export default function Home() {
         <div className="mt-12">
           <h2 className="text-2xl font-bold mb-6">Gold Prices by Karat</h2>
           <KaratPrices/>
+
         </div>
         
         <div className="mt-12 ">
