@@ -1,31 +1,3 @@
-// import { NextResponse } from "next/server";
-// import yahooFinance from "yahoo-finance2";
-
-// export async function GET() {
-//   try {
-//     const query = "Gold"; // Search for gold-related news
-//     const news = await yahooFinance.search(query);
-
-//     // Ensure news results exist and extract relevant fields
-//     const articles = news.news?.map((item) => ({
-//       title: item.title || "No title available",
-//       link: item.link || "#",
-//       pubDate: item.providerPublishTime
-//         ? new Date(item.providerPublishTime).toISOString() // Directly format the Date
-//         : "No date available",
-//       source: item.publisher || "Unknown source",
-//     })) || [];
-
-//     return NextResponse.json({ articles });
-//   } catch (error) {
-//     console.error("Error fetching Yahoo Finance gold news:", error);
-//     return NextResponse.json({ error: "Failed to fetch gold news" }, { status: 500 });
-//   }
-// }
-
-
-
-
 import { NextResponse } from "next/server";
 import yahooFinance from "yahoo-finance2";
 

@@ -9,17 +9,6 @@ export interface HistoricalData {
   price: number;
 }
 
-// export interface NewsItem {
-//   id: string;
-//   title: string;
-//   summary: string;
-//   source: string;
-//   url: string;
-//   publishedAt: string;
-//   imageUrl?: string;
-// }
-
-
 
 export interface NewsItem {
   title: string;
