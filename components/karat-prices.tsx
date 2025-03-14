@@ -119,7 +119,7 @@ async function getGoldPrices(): Promise<GoldPriceData> {
   return res.json();
 }
 
-export default async function KaratPrices() {
+export  async function KaratPrices() {
   const { prices, updatedAt } = await getGoldPrices();
 
   return (
